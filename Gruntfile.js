@@ -74,17 +74,6 @@ module.exports = function(grunt) {
                     'dist/css/style.css': ['src/css/style.css']
                 }
             }
-        },
-
-        responsive_images: {
-            compressPizzeria: {
-                options: {
-                    engine: {},
-                    files: {    
-                        'dist/views/images/pizzeria.jpg':'src/views/images/pizzeria.jpg'
-                    }
-                }
-            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-copy');
