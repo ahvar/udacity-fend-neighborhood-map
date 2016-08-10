@@ -8,7 +8,9 @@
   },
   "devDependencies": {
     "bower": "^1.7.9",
-    "grunt": "^1.0.1"
+    "grunt": "^1.0.1",
+    "http-server": "^0.9.0",
+    "ngrok": "^2.2.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
