@@ -1,0 +1,26 @@
+{
+  "name": "udacity-fend-neighborhood-map",
+  "description": "Explore places of interest in your neighborhood",
+  "main": "Gruntfile.js",
+  "authors": [
+    "Arthur Vargas"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "map",
+    "neighborhood"
+  ],
+  "homepage": "https://github.com/ahvar/udacity-fend-neighborhood-map",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "knockout": "^3.4.0",
+    "jQuery": "^3.1.0"
+  }
+}
