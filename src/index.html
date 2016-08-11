@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scale=no">
+    <meta charset="utf-8">
+	<title>Neighborhood Map</title>
+</head>
+<body>
+	<div class="container">
+		<div class="col-sm-2 col-md-3 col-lg-4">
+			<h1>Lugares Turisticos en Morelia, MX</h1>
+			<nav id="location-list">
+				<ul data-bind="foreach: locations">
+					<li data-bind="text: title,
+						click: $parent.selectLocation.bind($parent)">
+					</li>
+				</ul>
+			</nav>
+
+		</div>
+		<div id="morelia" class="col-10-sm col-md-9 col-lg-8">
+			
+		</div>
+	<script src="../bower_components/bootstrap/dist/css/bootstrap.css"></script>
+	<script src="../bower_components/jQuery/dist/jquery.min.js"></script>
+	<script src="../bower_components/knockout.js"></script>
+	<script src="src/scripts/app.js"></script>
+	<script src="src/styles/style.css"></script>
+	<script async defer
+	  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgy9M6bmPlYNu6rBZHs9F85rMw6g_OHwQ&region=MX&callback=initMXMap">
+	</script>
+</body>
+</html>

@@ -1,33 +1,112 @@
-{
+'use strict';
 // model
 var morelia;
-var lugares = [];
-// TODO: Complete the following function to initialize the map
+var locations = [
+    {   
+      title: "Acueducto de Morelia",
+      lat: 19.699203, 
+      lng: -101.15678,
+      streetAddress: "",
+      cityAddress: "Morelia, MX",
+      url: "",
+      id: "",
+      visible: ko.observable(true),
+      boolTest: true
+    },
+    {   
+      title: "Catedral de Morelia",
+      lat: 19.705950, 
+      lng: -101.194982,
+      streetAddress: "",
+      cityAddress: "",
+      url: "",
+      id: "",
+      visible: ko.observable(true),
+      boolTest: true
+    },
+    {   
+      title: "Estadio Morelos",
+      lat: 29.192834, 
+      lng: -108.150102,
+      streetAddress: "",
+      cityAddress: "",
+      url: "",
+      id: "",
+      visible: ko.observable(true),
+      boolTest: true
+    }  
+  ];
+
+
+
+// view model
 function initMXMap() {
   google.maps.visualRefresh = true;
   var mapOptions = {
-  zoom: 10,
-  center: new google.maps.LatLng(19.7060,-101.1950),
-  mapTypeId: google.maps.MapTypeId.ROADMAP,
-  mapTypeControl: true,
-  mapTypeControlOptions: {
-   style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-   position: google.maps.ControlPosition.BOTTOM_CENTER,
-   mapTypeIds:[google.maps.MapTypeId.ROADMAP]
-  },
-  panControl:true,
-  panControlOptions: {
-   position: google.maps.ControlPosition.TOP_RIGHT
-  },
-  zoomControl: true,
-  zoomControlOptions: {
-   style: google.maps.ZoomControlStyle.LARGE,
-   position: google.maps.ControlPosition.LEFT_CENTER
+    zoom: 14,
+    center: new google.maps.LatLng(19.7060,-101.1950),
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    mapTypeControl: true,
+    mapTypeControlOptions: {
+     style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+     position: google.maps.ControlPosition.BOTTOM_CENTER,
+     mapTypeIds:[google.maps.MapTypeId.ROADMAP]
+    },
+    panControl:true,
+    panControlOptions: {
+     position: google.maps.ControlPosition.TOP_RIGHT
+    },
+    zoomControl: true,
+    zoomControlOptions: {
+     style: google.maps.ZoomControlStyle.LARGE,
+     position: google.maps.ControlPosition.LEFT_CENTER
   }
+
+  morelia = new google.maps.Map(document.getElementById('morelia'), mapOptions);
+
 };
-// TODO: use a constructor to create a new map JS object. You can use the coordinates
-// we used, 40.7413549, -73.99802439999996 or your own!
-morelia = new google.maps.Map(document.getElementById('morelia'), mapOptions);
+
+
+window.LocationList=(function(ko) {
+  return {
+    create: function(locations) {
+      var viewmodel = {};
+
+      //properties
+      viewmodel.locations = locations;
+      viewmodel.selectedLocation = ko.observable(places[0]);
+
+      //methods
+      viewmodel.selectLocation = function(location) {
+        this.selectedLocation(location);
+      };
+      viewmodel.isSelected = function (location) {
+        return this.selectedLocation() === location;
+      };
+
+      return viewmodel;
+    }
+  };
+}(window.ko));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //this code block will check whether the browser supports Geolocation API and sets the center
 //of the map according to the coordinates of the device
@@ -111,7 +190,7 @@ function startButtonEvents() {
 
 google.maps.event.addListener(mexicoMap,'click',function(){
  infowindow.close();
-});}
+});
 
 };
 
