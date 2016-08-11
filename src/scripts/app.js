@@ -1,43 +1,52 @@
 'use strict';
-// model
+/****************************
+------------model------------               
+*****************************/
+// map
 var morelia;
+
+// an array of locations
 var locations = [
-    {   
-      title: "Acueducto de Morelia",
-      lat: 19.699203, 
-      lng: -101.15678,
-      streetAddress: "",
-      cityAddress: "Morelia, MX",
-      url: "",
-      id: "",
-      visible: ko.observable(true),
-      boolTest: true
-    },
-    {   
-      title: "Catedral de Morelia",
-      lat: 19.705950, 
-      lng: -101.194982,
-      streetAddress: "",
-      cityAddress: "",
-      url: "",
-      id: "",
-      visible: ko.observable(true),
-      boolTest: true
-    },
-    {   
-      title: "Estadio Morelos",
-      lat: 29.192834, 
-      lng: -108.150102,
-      streetAddress: "",
-      cityAddress: "",
-      url: "",
-      id: "",
-      visible: ko.observable(true),
-      boolTest: true
-    }  
-  ];
+  {   
+    title: "Acueducto de Morelia",
+    lat: 19.699203, 
+    lng: -101.15678,
+    streetAddress: "",
+    cityAddress: "Morelia, MX",
+    url: "",
+    id: "",
+    visible: ko.observable(true),
+    boolTest: true,
+    tags: ['monuments','architecture','aqueduct']
+  },
+  {   
+    title: "Catedral de Morelia",
+    lat: 19.705950, 
+    lng: -101.194982,
+    streetAddress: "",
+    cityAddress: "",
+    url: "",
+    id: "",
+    visible: ko.observable(true),
+    boolTest: true,
+    tags: ['cathedral','church',]
+  },
+  {   
+    title: "Estadio Morelos",
+    lat: 29.192834, 
+    lng: -108.150102,
+    streetAddress: "",
+    cityAddress: "",
+    url: "",
+    id: "",
+    visible: ko.observable(true),
+    boolTest: true,
+    tags: ['stadium','soccer','futbol']
+  }  
+];
 
-
+//an array of markers
+var markers = [];
 
 // view model
 function initMXMap() {
@@ -66,6 +75,38 @@ function initMXMap() {
 
 };
 
+function populateInfoWindow(marker,infowindow) {
+  if(infowindow.marker != marker) {
+    infowindow.setContent('');
+    infowindow.marker = marker;
+    infowindow.addListener('closeclick',function() {
+      infowindow.marker=null;
+    });
+    var streetView = new google.maps.StreetViewService();
+    var radius = 50;
+    function getStreetView(data,status){
+      if(status == google.maps.StreetViewStatus.OK) {
+        var streetViewLocation = data.location.latlng;
+        var heading = google.maps.geometry.spherical.computeHeading(
+          streetViewLocation, marker.position);
+        infowindow.setContent('<div>' + marker.title + '</div><div id="pano"</div>');
+        var options = {
+          position: streetViewLocation,
+          pov: {
+            heading: heading,
+            pitch: 30
+          }
+        };
+      } else {
+        infowindow.setContent('<div>' + marker.title + '</div>' +
+          '<div>No street view available</div>');
+      }
+
+      streetView.getPanoramaByLocation(marker.position,radius,getStreetView);
+      infowindow.open(morelia,marker);
+    };
+  }
+};
 
 window.LocationList=(function(ko) {
   return {
@@ -73,21 +114,66 @@ window.LocationList=(function(ko) {
       var viewmodel = {};
 
       //properties
+      viewmodel.selectedLocations = ko.observableArray(locations);
       viewmodel.locations = locations;
-      viewmodel.selectedLocation = ko.observable(places[0]);
+      viewmodel.selectedLocation = ko.observable(locations[0]);
 
       //methods
       viewmodel.selectLocation = function(location) {
         this.selectedLocation(location);
       };
-      viewmodel.isSelected = function (location) {
+      viewmodel.isSelected = function(location) {
         return this.selectedLocation() === location;
       };
+      for (var i = 0; i < locations.length; i++) {
+        var lat = locations[i].lat;
+        var lng = locations[i].lng;
+        var position = {"lat":lat,"lng":lng};
+        var title = locations[i].title;
+        var marker = new google.maps.Marker({
+          position: position,
+          title: title,
+          animation: google.maps.Animation.DROP,
+          id: i
+        });
+
+  markers.push(marker);
+  marker.addListener('click',function() {
+    populateInfoWindow(this,largeInfoWindow);
+  });
+  marker.addListener('mouseover',function() {
+    this.setIcon(highlightedIcon);
+  });
+  marker.addListener('mouseout',function(){
+    this.setIcon(defaultIcon);
+  });
+}
 
       return viewmodel;
     }
   };
 }(window.ko));
+
+window.LocationDetails = (function(ko) {
+  // view model properties
+  return {
+    create: function(location) {
+      var viewmodel = {};
+      return viewmodel;
+    }
+  };
+
+  // properties
+  viewmodel.title = ko.observable(locations[0].title);
+  viewmodel.lat = ko.observable(locations[0].lat);
+  viewmodel.lng = ko.observable(locations[0].lng);
+  viewmodel.streetAddress = ko.observable(locations[0].streetAddress);
+  viewmodel.cityAddress = ko.observable(locations[0].cityAddress);
+  viewmodel.url = ko.observable(locations[0].url);
+
+
+});
+
 
 
 
