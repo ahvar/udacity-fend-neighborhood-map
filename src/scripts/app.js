@@ -48,6 +48,7 @@ var locations = [
 //an array of markers
 var markers = [];
 
+
 var morelia = {
   map: {},
   infowindow: new google.maps.InfoWindow(),
@@ -75,8 +76,42 @@ var morelia = {
   init: function(viewmodel) {
     morelia.map = new google.maps.Map(document.getElementById('morelia'), morelia.options);
     if(viewmodel.initialized && !viewmodel.withMarkers) viewmodel.showMarkers();
-
+  }
 };
+
+// this function accepts a single location from the model and ties it
+// to the view via knockout observables 
+var location = function(model,parent) {
+
+  // the observables hold values and can notify potential subscribers whenever
+  // that value changes. Observables are created with special factory subscriptions
+  // that knockout manages behind the scenes.
+  this.title = ko.observable(model.title);
+  this.lat = ko.observable(model.lat);
+  this.lng = ko.observable(model.lng);
+  this.streetAddress = ko.observable(model.streetAddress);
+  this.cityAddress = ko.observable(model.cityAddress);
+  this.url = ko.observable(model.url);
+  this.tags = ko.observable(model.tags);
+
+  this.initialized = ko.observable(false);
+
+  // create a new marker 
+  var marker = new google.maps.Marker({
+    position: new google.maps.LatLng(model.lat,model.lng),
+    icon: 'src/images/situation-pin.png'
+  });
+
+  google.maps.event.addListener(marker,'click',(function(location,parent){
+    return function() {
+      parent.showLocation(location);
+    };
+  })(this,parent));
+
+  //by making this a property, the marker for each location can be easily accessed 
+  this.marker = marker;
+};
+
 
 function populateInfoWindow(marker,infowindow) {
   if(infowindow.marker != marker) {
@@ -168,13 +203,7 @@ window.LocationDetails = (function(ko) {
     }
   };
 
-  // properties
-  viewmodel.title = ko.observable(locations[0].title);
-  viewmodel.lat = ko.observable(locations[0].lat);
-  viewmodel.lng = ko.observable(locations[0].lng);
-  viewmodel.streetAddress = ko.observable(locations[0].streetAddress);
-  viewmodel.cityAddress = ko.observable(locations[0].cityAddress);
-  viewmodel.url = ko.observable(locations[0].url);
+
 
 
 });
