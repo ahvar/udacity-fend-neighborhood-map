@@ -48,30 +48,33 @@ var locations = [
 //an array of markers
 var markers = [];
 
-// view model
-function initMXMap() {
-  google.maps.visualRefresh = true;
-  var mapOptions = {
-    zoom: 14,
-    center: new google.maps.LatLng(19.7060,-101.1950),
+var morelia = {
+  map: {},
+  infowindow: new google.maps.InfoWindow(),
+  options: {
+    center: {19.7060,-101.1950},
+    zoom: 12
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: true,
     mapTypeControlOptions: {
-     style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-     position: google.maps.ControlPosition.BOTTOM_CENTER,
-     mapTypeIds:[google.maps.MapTypeId.ROADMAP]
-    },
-    panControl:true,
-    panControlOptions: {
-     position: google.maps.ControlPosition.TOP_RIGHT
-    },
-    zoomControl: true,
-    zoomControlOptions: {
-     style: google.maps.ZoomControlStyle.LARGE,
-     position: google.maps.ControlPosition.LEFT_CENTER
-  }
-
-  morelia = new google.maps.Map(document.getElementById('morelia'), mapOptions);
+      style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+      position: google.maps.ControlPosition.BOTTOM_CENTER,
+      mapTypeIds: [google.maps.MapTypeId.ROADMAP],
+      panControl: true,
+      panControlOptions: {
+        position: google.maps.ControlPosition.TOP_RIGHT
+      },
+      zoomControl: true,
+      zoomControlOptions: {
+        style: google.maps.ZoomControlStyle.LARGE,
+        position: google.maps.ControlPosition.LEFT_CENTER
+      }
+    }
+  },
+  infoWindowContent: '<div class = "info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
+  init: function(viewmodel) {
+    morelia.map = new google.maps.Map(document.getElementById('morelia'), morelia.options);
+    if(viewmodel.initialized && !viewmodel.withMarkers) viewmodel.showMarkers();
 
 };
 
@@ -114,9 +117,11 @@ window.LocationList=(function(ko) {
       var viewmodel = {};
 
       //properties
-      viewmodel.selectedLocations = ko.observableArray(locations);
       viewmodel.locations = locations;
+      viewmodel.selectedLocations = ko.observableArray(locations);
       viewmodel.selectedLocation = ko.observable(locations[0]);
+      viewmodel.searchFilter = ko.observable('');
+      
 
       //methods
       viewmodel.selectLocation = function(location) {
