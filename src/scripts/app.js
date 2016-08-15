@@ -1,7 +1,9 @@
 'use strict';
-/****************************
-------------model------------               
-*****************************/
+/******************************************
+******************MODEL********************
+domain-specific data and information
+about locations of interest in Morelia, MX
+*******************************************/
 // map
 var morelia;
 
@@ -79,9 +81,14 @@ var morelia = {
   }
 };
 
+
+/*********************************************************************
+//************************** VIEW MODEL *******************************
 // this function accepts a single location from the model and ties it
 // to the view via knockout observables 
-var location = function(model,parent) {
+**********************************************************************/
+
+var Location = function(model,parent) {
 
   // the observables hold values and can notify potential subscribers whenever
   // that value changes. Observables are created with special factory subscriptions
@@ -111,6 +118,104 @@ var location = function(model,parent) {
   //by making this a property, the marker for each location can be easily accessed 
   this.marker = marker;
 };
+
+
+var select = function(search) {
+  this.word = ko.observable(search.name);
+  this.is = ko.observable(true);
+};
+
+var viewmodel = function() {
+  var self = this;
+  self.selectWord = ko.observable('');
+  self.selectedLocation = ko.observable();
+  self.initialized = false;
+  self.hasMarkers = false;
+  self.networkProblem = ko.observable(false);
+
+  self.init = function() {
+    var searchWordsArray = [];
+    var currentDropDown = [];
+
+    /*create an array to hold locations as the user is searching*/
+    self.selectedLocationArray = ko.observableArray([]);
+
+    /* 
+     * Use a nested for loop to make a KO observable for each
+     * location and loop through the tags for each location
+     * and add them to the list of search words
+     */
+    var allLocations = locations;
+    for (var i = 0; i < allLocations.length; i++) {
+      self.selectedLocationArray.push(new Location(allLocations[i], self));
+      // if the tag doesn't already exists within the array of search words then push
+      for (var j = 0; i < allLocations[i].tags.length; j++) {
+        if(searchWordsArray.indexOf(allLocations[i].tags[j]) < 0) {
+          searchWordsArray.push(allLocations[i].tags[j]);
+        }
+      }
+    }
+
+    for(var i = 0; i < searchWordsArray.length; i++) {
+      searchWordsArray.push(new Select({word: searchWordsArray[i]}));
+    }
+
+    self.searchWords = ko.observableArray(currentDropDown);
+
+    self.currSearchWords = ko.computed(function() {
+      var thisSearchWordArray = [];
+      ko.utils.arrayForEach(self.searchWords(), function(select) {
+        if(select.is()) thisSearchWordArray.push(select.name());
+      });
+      return thisSearchWordArray;
+    });
+
+    self.listOfSelectLocations = ko.computed(function(){
+
+      var searchLocationArray = ko.observableArray([]);
+      var userSelectedLocations = ko.observableArray([]);
+      /* 
+       * Use nested for loop to go through the array of
+       * of locations and put the associated tags into 
+       * a separate array called locationSearchWords.
+       * Loop through this array and assign matching words
+       * to matches variable.
+       */
+      for(var i = 0; self.selectedLocationArray; i++) {
+        var locationSearchWords = selectedLocationArray[i].tags();
+        for(var j = 0; locationSearchWords.length; j++) {
+          var matches = self.currSearchWords().indexOf(locationSearchWords[j]) != -1;
+            return matches;
+        }
+        if(matches.length > 0) {
+            searchLocationArray.push(selectedLocationArray[i]);
+        }
+      }   
+
+
+
+    });
+
+
+
+
+    }
+  };
+
+      allLocations[i]
+        var lat = locations[i].lat;
+        var lng = locations[i].lng;
+        var position = {"lat":lat,"lng":lng};
+        var title = locations[i].title;
+        var marker = new google.maps.Marker({
+          position: position,
+          title: title,
+          animation: google.maps.Animation.DROP,
+          id: i
+        });
+  }
+}
+
 
 
 function populateInfoWindow(marker,infowindow) {
