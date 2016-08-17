@@ -56,7 +56,7 @@ var morelia = {
   infowindow: new google.maps.InfoWindow(),
   options: {
     center: {19.7060,-101.1950},
-    zoom: 12
+    zoom: 12,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: true,
     mapTypeControlOptions: {
@@ -101,7 +101,7 @@ var Location = function(model,parent) {
   this.url = ko.observable(model.url);
   this.tags = ko.observable(model.tags);
 
-  this.initialized = ko.observable(false);
+  this.start = ko.observable(false);
 
   // create a new marker 
   var marker = new google.maps.Marker({
@@ -129,7 +129,7 @@ var viewmodel = function() {
   var self = this;
   self.selectWord = ko.observable('');
   self.selectedLocation = ko.observable();
-  self.initialized = false;
+  self.start = false;
   self.hasMarkers = false;
   self.networkProblem = ko.observable(false);
 
@@ -156,8 +156,8 @@ var viewmodel = function() {
       }
     }
 
-    for(var i = 0; i < searchWordsArray.length; i++) {
-      searchWordsArray.push(new Select({word: searchWordsArray[i]}));
+    for(var k = 0; k < searchWordsArray.length; k++) {
+      searchWordsArray.push(new Select({word: searchWordsArray[k]}));
     }
 
     self.searchWords = ko.observableArray(currentDropDown);
@@ -181,26 +181,91 @@ var viewmodel = function() {
        * Loop through this array and assign matching words
        * to matches variable.
        */
-      for(var i = 0; self.selectedLocationArray; i++) {
-        var locationSearchWords = selectedLocationArray[i].tags();
+      var matches;
+      for(var i = 0; i < self.selectedLocationArray.length; i++) {
+        var locationSearchWords = self.selectedLocationArray[i].tags();
         for(var j = 0; locationSearchWords.length; j++) {
-          var matches = self.currSearchWords().indexOf(locationSearchWords[j]) != -1;
+          matches = self.currSearchWords().indexOf(locationSearchWords[j]) != -1;
             return matches;
         }
         if(matches.length > 0) {
-            searchLocationArray.push(selectedLocationArray[i]);
+            searchLocationArray.push(self.selectedLocationArray[i]);
         }
-      }   
+      }
 
+      var wordSelectionArray = self.selectWord().toLowerCase();
 
+      if(!wordSelectionArray) {
+        userSelectedLocations = searchLocationArray();
+      } else {
+        userSelectedLocations = ko.utils.arrayFilter(searchLocationArray(),function(location) {
+          return location.title().toLowerCase().indexOf(wordSelectionArray) !== -1;
+        });
+      }
+
+      self.selectMarkers(userSelectedLocations);
+      return userSelectedLocations;
 
     });
 
-
-
-
+    if(!self.hasMarkers) {
+      self.showMarkers();
+      self.start = true;
     }
   };
+
+  /*
+   * loops through the array of locations passed into the function
+   * and searches for this location in the selectedLocationArray
+   * if match found, the marker property is set to visible
+   */
+  self.selectMarkers = function(selectedLocations) {
+    var locationIndex;
+    for(var m = 0; m < selectedLocations.length; m++) {
+      if(self.selectedLocationArray.indexOf(selectedLocations[m]) === -1) {
+        locationIndex = self.selectedLocationArray.indexOf(selectedLocations[m]);
+        self.selectedLocationArray[locationIndex].marker.setVisible(false);
+      } else {
+        locationIndex = self.selectedLocationArray.indexOf(selectedLocations[m]);
+        self.selectedLocationArray[locationIndex].marker.setVisible(true);
+      }
+    }
+  };
+
+  /*
+   * Allows user to filter the locations in the view
+   */
+  self.toggleSelect = function(select) {
+    select.is(!select.is());
+  };
+
+  self.displayLocation = function(location) {
+    morelia.infoWindow.setContent(morelia.infoWindowContent.replace('%title%',location.title()).replace('%description%',location.streetAddress()));
+    morelia.infoWindow.open(morelia.map,location.marker);
+
+    if(self.currentLocation()) {
+      self.currentLocation().marker.setIcon('images/situation-pin.png');
+    }  
+
+    location.marker.setIcon('images/situation-pin.png');
+
+    self.networkProblem(false);
+
+    if((!location.start()) {
+
+      $.ajax({
+        url: "https://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + $cityStr" + "&sort=newest&api-key=e82157a4c7cd48d68abae0a7452a48aa";
+              });
+      .done(function(data) {
+        var place = data.response.places
+      })
+    })
+
+
+  }
+
+
+};
 
       allLocations[i]
         var lat = locations[i].lat;
