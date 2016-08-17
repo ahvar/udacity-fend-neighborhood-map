@@ -252,13 +252,39 @@ var viewmodel = function() {
     self.networkProblem(false);
 
     if((!location.start()) {
+      var $nytElem = $("#all-articles");
 
+      //store nyt url in variable nytURL
+      var nytURL = "http://api.nytimes.com/svc/semantic/v2/articlesearch.json?q="+location.cityAddress.value()+
+        "&sort=newest";
+
+      //add parameter for country and api key to nytURL
+      nytURL =+  $.param({
+        'country_code': 'MX',
+        'api-key': "e82157a4c7cd48d68abae0a7452a48aa"
+      });
+
+      //request data
       $.ajax({
-        url: "https://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + $cityStr" + "&sort=newest&api-key=e82157a4c7cd48d68abae0a7452a48aa";
-              });
-      .done(function(data) {
-        var place = data.response.places
+        url: nytURL,
+        dataType: 'json'
       })
+      .done(function(data) {
+        //append each article url to the all articles element
+        $.each(data,function(index,element) {
+          $nytElem.append('<li class="article">' + '<a href= "'+element.url+'">'+location.cityAddress.value()+'</a>'+
+            '</li>');
+        });
+        location.start(true);
+        self.currentLocation(location);
+        self.scrollTo("#all-articles");
+      })
+      .fail(function(err) {
+        self.networkProblem(true);
+        self.scrollTo("#all-articles");
+      });
+
+      .fail(function(err))
     })
 
 
