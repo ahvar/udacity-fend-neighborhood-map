@@ -1,56 +1,77 @@
 'use strict';
-/******************************************
-******************MODEL********************
-domain-specific data and information
-about locations of interest in Morelia, MX
-*******************************************/
-// map
-var morelia;
 
-// an array of locations
+/******************************************
+/*******************MODEL********************
+/* Domain-specific data and information
+/* about locations of interest in Morelia, MX
+*******************************************/
+
 var locations = [
   {   
     title: "Acueducto de Morelia",
     lat: 19.699203, 
     lng: -101.15678,
-    streetAddress: "",
-    cityAddress: "Morelia, MX",
-    url: "",
+    streetAddress: "Avenue Acueducto 1464, Chapultepec Nte. 58260",
+    cityAddress: "Morelia, Michoacan",
+    url: "http://morelianas.com/morelia/monumentos/acueducto-de-morelia/",
     id: "",
     visible: ko.observable(true),
     boolTest: true,
-    tags: ['monuments','architecture','aqueduct']
+    tags: ['monuments','architecture','aqueduct','landmark','historic']
   },
   {   
     title: "Catedral de Morelia",
     lat: 19.705950, 
     lng: -101.194982,
-    streetAddress: "",
-    cityAddress: "",
-    url: "",
+    streetAddress: "Avenue Francisco I. Madero Pte S/N, Centro, 58000",
+    cityAddress: "Morelia, Michoacan",
+    url: "http://morelianas.com/morelia/edificios/catedral-de-morelia/",
     id: "",
     visible: ko.observable(true),
     boolTest: true,
-    tags: ['cathedral','church',]
+    tags: ['cathedral','church','building','historic','architecture','landmark','center','catholic']
   },
   {   
     title: "Estadio Morelos",
     lat: 29.192834, 
     lng: -108.150102,
-    streetAddress: "",
-    cityAddress: "",
-    url: "",
+    streetAddress: "Libramiento Poniente s/n, Leandro Valle, 58147",
+    cityAddress: "Morelia, Michoacan",
+    url: "https://en.wikipedia.org/wiki/Estadio_Morelos",
     id: "",
     visible: ko.observable(true),
     boolTest: true,
-    tags: ['stadium','soccer','futbol']
-  }  
+    tags: ['stadium','soccer','futbol','sports']
+  },
+  {   
+    title: "Monumento ecuestre de Jose Maria Morelos",
+    lat: 19.0786, 
+    lng: -102.3554,
+    streetAddress: "Janitzio",
+    cityAddress: "Morelia, Michoacan",
+    url: "http://morelianas.com/morelia/monumentos/monumento-ecuestre-de-jose-maria-morelos/",
+    id: "",
+    visible: ko.observable(true),
+    boolTest: true,
+    tags: ['sculpture','horse','monument','historic','statue','Jose Maria Morelos']
+  },
+  {   
+    title: "Antiguo Palacio de Justicia",
+    lat: 25.7349, 
+    lng: -100.3094,
+    streetAddress: "Portal Allende 267, Centro Historico",
+    cityAddress: "Morelia, Michoacan",
+    url: "http://morelianas.com/morelia/museos/antiguo-palacio-justicia/",
+    id: "",
+    visible: ko.observable(true),
+    boolTest: true,
+    tags: ['government','historic','palace','court','justice','legal','museum','culture']
+  },
 ];
 
-//an array of markers
-var markers = [];
-
-
+/*
+ * A map of Morelia, Michoacan, MX
+ */
 var morelia = {
   map: {},
   infowindow: new google.maps.InfoWindow(),
@@ -77,22 +98,23 @@ var morelia = {
   infoWindowContent: '<div class = "info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
   init: function(viewmodel) {
     morelia.map = new google.maps.Map(document.getElementById('morelia'), morelia.options);
-    if(viewmodel.initialized && !viewmodel.withMarkers) viewmodel.showMarkers();
+    if(viewmodel.start && !viewmodel.markersDropped) {
+      viewmodel.dropMarkers();
+    } 
   }
 };
 
 
 /*********************************************************************
-//************************** VIEW MODEL *******************************
-// this function accepts a single location from the model and ties it
-// to the view via knockout observables 
+/************************** LOCATION *********************************
+/* This global object creates several knockout observables defining
+/* a specific point of interest. Observables notify potential subscribers
+/* whenever a value changes. The location object is used by the view model 
 **********************************************************************/
 
 var Location = function(model,parent) {
 
-  // the observables hold values and can notify potential subscribers whenever
-  // that value changes. Observables are created with special factory subscriptions
-  // that knockout manages behind the scenes.
+  // Object properties
   this.title = ko.observable(model.title);
   this.lat = ko.observable(model.lat);
   this.lng = ko.observable(model.lng);
@@ -106,7 +128,7 @@ var Location = function(model,parent) {
   // create a new marker 
   var marker = new google.maps.Marker({
     position: new google.maps.LatLng(model.lat,model.lng),
-    icon: 'src/images/situation-pin.png'
+    icon: 'images/situation-pin.png'
   });
 
   google.maps.event.addListener(marker,'click',(function(location,parent){
@@ -114,19 +136,24 @@ var Location = function(model,parent) {
       parent.showLocation(location);
     };
   })(this,parent));
-
-  //by making this a property, the marker for each location can be easily accessed 
+ 
   this.marker = marker;
 };
 
 
-var select = function(search) {
-  this.word = ko.observable(search.name);
+var Select = function(search) {
+  this.word = ko.observable(search.title);
   this.is = ko.observable(true);
 };
 
+/*********************************************************************
+//************************** VIEW MODEL *******************************
+**********************************************************************/
+
 var viewmodel = function() {
   var self = this;
+
+  // view model properties
   self.selectWord = ko.observable('');
   self.selectedLocation = ko.observable();
   self.start = false;
@@ -137,20 +164,20 @@ var viewmodel = function() {
     var searchWordsArray = [];
     var currentDropDown = [];
 
-    /*create an array to hold locations as the user is searching*/
+    /*create an array to hold locations of interest to user*/
     self.selectedLocationArray = ko.observableArray([]);
 
     /* 
      * Use a nested for loop to make a KO observable for each
-     * location and loop through the tags for each location
-     * and add them to the list of search words
+     * location in model and loop through the tags for each location
+     * and add them to the list of searchable words
      */
     var allLocations = locations;
     for (var i = 0; i < allLocations.length; i++) {
       self.selectedLocationArray.push(new Location(allLocations[i], self));
-      // if the tag doesn't already exists within the array of search words then push
-      for (var j = 0; i < allLocations[i].tags.length; j++) {
-        if(searchWordsArray.indexOf(allLocations[i].tags[j]) < 0) {
+      // if the tag doesn't already exist within the array of search words then push
+      for (var j = 0; j < allLocations[i].tags.length; j++) {
+        if(allLocations[i].tags[j].indexOf(searchWordsArray) < 0) {
           searchWordsArray.push(allLocations[i].tags[j]);
         }
       }
@@ -310,26 +337,8 @@ var viewmodel = function() {
     self.markersDropped = true;
   }
 
-};
-
-      allLocations[i]
-        var lat = locations[i].lat;
-        var lng = locations[i].lng;
-        var position = {"lat":lat,"lng":lng};
-        var title = locations[i].title;
-        var marker = new google.maps.Marker({
-          position: position,
-          title: title,
-          animation: google.maps.Animation.DROP,
-          id: i
-        });
-  }
-}
-
-
-
-function populateInfoWindow(marker,infowindow) {
-  if(infowindow.marker != marker) {
+  self.populateInfoWindow = function(marker,infowindow) {
+    if(infowindow.marker != marker) {
     infowindow.setContent('');
     infowindow.marker = marker;
     infowindow.addListener('closeclick',function() {
@@ -354,74 +363,35 @@ function populateInfoWindow(marker,infowindow) {
         infowindow.setContent('<div>' + marker.title + '</div>' +
           '<div>No street view available</div>');
       }
-
       streetView.getPanoramaByLocation(marker.position,radius,getStreetView);
       infowindow.open(morelia,marker);
-    };
+    }
   }
 };
 
-window.LocationList=(function(ko) {
-  return {
-    create: function(locations) {
-      var viewmodel = {};
+var viewmodel = new viewmodel();
 
-      //properties
-      viewmodel.locations = locations;
-      viewmodel.selectedLocations = ko.observableArray(locations);
-      viewmodel.selectedLocation = ko.observable(locations[0]);
-      viewmodel.searchFilter = ko.observable('');
+$(document).ready(function() {
+  vm.init();
+  ko.applyBindings(vm);
+
+  $(window).on('resize', function() {
+    google.maps.event.trigger(morelia.map,'resize');
+    morelia.map.setCenter(morelia.options.center);
+  });
+});
+
+google.maps.event.addDomListener(window,'load',morelia.init(vm));
+
+
+
+
+
+
+
+
       
 
-      //methods
-      viewmodel.selectLocation = function(location) {
-        this.selectedLocation(location);
-      };
-      viewmodel.isSelected = function(location) {
-        return this.selectedLocation() === location;
-      };
-      for (var i = 0; i < locations.length; i++) {
-        var lat = locations[i].lat;
-        var lng = locations[i].lng;
-        var position = {"lat":lat,"lng":lng};
-        var title = locations[i].title;
-        var marker = new google.maps.Marker({
-          position: position,
-          title: title,
-          animation: google.maps.Animation.DROP,
-          id: i
-        });
-
-  markers.push(marker);
-  marker.addListener('click',function() {
-    populateInfoWindow(this,largeInfoWindow);
-  });
-  marker.addListener('mouseover',function() {
-    this.setIcon(highlightedIcon);
-  });
-  marker.addListener('mouseout',function(){
-    this.setIcon(defaultIcon);
-  });
-}
-
-      return viewmodel;
-    }
-  };
-}(window.ko));
-
-window.LocationDetails = (function(ko) {
-  // view model properties
-  return {
-    create: function(location) {
-      var viewmodel = {};
-      return viewmodel;
-    }
-  };
-
-
-
-
-});
 
 
 
@@ -432,100 +402,4 @@ window.LocationDetails = (function(ko) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-//this code block will check whether the browser supports Geolocation API and sets the center
-//of the map according to the coordinates of the device
-if (navigator.geolocation) {
- navigator.geolocation.getCurrentPosition(
-   function(position) {
-   var lat = position.coords.latitude;
-   var lng = position.coords.longitude;
-   //Creating LatLng object with latitude and longitude
-   var devCenter = new google.maps.LatLng(lat,lng);
-   map.setCenter(devCenter);
-   map.setZoom(15);
- });
-}
-
-startButtonEvents();
-
-var geocoder = new google.maps.Geocoder;
-var morelia = {lat: 19.705950, lng: -101.194982};
-var infowindow = new google.maps.InfoWindow({
- content:'<div class=currentWindow>'+'</div>'
-});
-
-geocoder.geocode({'address': 'Morelia',}, function(results,status) {
-   if (status === 'OK') {
-     mexicoMap.setCenter(results[0].geometry.location);
-     infowindow.setPosition(results[0].geometry.location);
-     new google.maps.Marker({
-       map: morelia,
-       position: results[0].geometry.location
-     });
-   } else {
-     window.alert('Google was not successful for the following reason: ' + status);
-   }
-});
-}
-//this zooms the map to a street view
-function zoomToStreet() {
- morelia.setZoom(22);
-}
-function startButtonEvents() {
-
- document.getElementById('btnZoomToStr').addEventListener('click',function(){
-   zoomToStreet();
- });
- document.getElementById('btnRoad').addEventListener('click',function(){
-   mexicoMap.setMapTypeId(google.maps.MapTypeId.ROADMAP);
- });
- document.getElementById('btnSat').addEventListener('click',function(){
-   mexicoMap.setMapTypeId(google.maps.MapTypeId.SATELLITE);
- });
- document.getElementById('btnHyb').addEventListener('click',function() {
-   mexicoMap.setMapTypeId(google.maps.MapTypeId.HYBRID);
- });
- document.getElementById('btnTer').addEventListener('click',function(){
-   mexicoMap.setMapTypeId(google.maps.MapTypeId.TERRAIN);
- });
-
- google.maps.event.addListener(,'click',function(){
- var morGeoCode =  new google.maps.Geocoder;
- morGeoCode.geocode({location:{lat: 19.705950,lng: -101.194982}},function(results,status){
-   if (status===google.maps.GeocoderStatus.OK){
-     mexicoMap.setCenter(results[0].geometry.location);
-     infowindow.open(mexicoMap, new google.maps.StreetViewPanorama({infowindow,
-       position:morelia,
-       pov: {
-         heading:34,
-         pitch:10
-       },
-       zoomControl:true,
-       visible: true
-     }),morelia);
-   } else {
-     console.log('did not work');
-   }
- });
- //use geocoder to open an info window at markers
- //have the info window display a google street view 
- //of the location
-});
-
-google.maps.event.addListener(mexicoMap,'click',function(){
- infowindow.close();
-});
-
-};
 
