@@ -130,7 +130,7 @@ var viewmodel = function() {
   self.selectWord = ko.observable('');
   self.selectedLocation = ko.observable();
   self.start = false;
-  self.hasMarkers = false;
+  self.markersDropped = false;
   self.networkProblem = ko.observable(false);
 
   self.init = function() {
@@ -208,8 +208,8 @@ var viewmodel = function() {
 
     });
 
-    if(!self.hasMarkers) {
-      self.showMarkers();
+    if(!self.markersDropped) {
+      self.dropMarkers();
       self.start = true;
     }
   };
@@ -249,19 +249,26 @@ var viewmodel = function() {
 
     location.marker.setIcon('images/situation-pin.png');
 
+    // assign the current city to the selectedCity variable
+    var selectedCity = location.cityAddress.value();
+
+
     self.networkProblem(false);
+    
+    // store the location-list html element in the $nytElem variable
+    var $nytElem = $("#location-list");
 
-    if((!location.start()) {
-      var $nytElem = $("#all-articles");
 
+    if(!location.start()) {
       //store nyt url in variable nytURL
-      var nytURL = "http://api.nytimes.com/svc/semantic/v2/articlesearch.json?q="+location.cityAddress.value()+
-        "&sort=newest";
+      var nytURL = "http://api.nytimes.com/svc/semantic/v2/articlesearch.json";
 
       //add parameter for country and api key to nytURL
       nytURL =+  $.param({
-        'country_code': 'MX',
-        'api-key': "e82157a4c7cd48d68abae0a7452a48aa"
+        'q': selectedCity,
+        'api-key': "e82157a4c7cd48d68abae0a7452a48aa",
+        'fq': "Tourist",
+        'sort': "newest"
       });
 
       //request data
@@ -270,26 +277,38 @@ var viewmodel = function() {
         dataType: 'json'
       })
       .done(function(data) {
+
+        var articles = data.response.docs[0];
         //append each article url to the all articles element
-        $.each(data,function(index,element) {
-          $nytElem.append('<li class="article">' + '<a href= "'+element.url+'">'+location.cityAddress.value()+'</a>'+
+        $.each(articles,function(index,element) {
+          $nytElem.append('<li class="article">' + '<a href= "'+element.web_url+'">' + selectedCity + '</a>'+
             '</li>');
         });
+        //set the view model's current location property to the location
         location.start(true);
         self.currentLocation(location);
-        self.scrollTo("#all-articles");
-      })
-      .fail(function(err) {
+        self.scrollTo("#location-list");
+      }).fail(function(error) {
         self.networkProblem(true);
-        self.scrollTo("#all-articles");
+        self.scrollTo("#location-list");
       });
+    } else {
+      self.currentLocation(location);
+      self.scrollTo("#location-list");
+    } 
 
-      .fail(function(err))
-    })
+  };
 
+  self.scrollTo = function(e1) {
+    $('html,body').animate({scrollTop:$(e1).offset().top},"slow");
+  };
 
+  self.dropMarkers = function(){
+    for(var n = 0; self.selectedLocationArray.length; n++) {
+      self.selectedLocationArray[n].marker.setMap(morelia.map);
+    }
+    self.markersDropped = true;
   }
-
 
 };
 
