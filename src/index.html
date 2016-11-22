@@ -4,6 +4,8 @@
 	<meta name="viewport" content="initial-scale=1.0, user-scale=no">
     <meta charset="utf-8">
 	<title>Neighborhood Map</title>
+	<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css">
+	<link src="styles/style.css">
 </head>
 <body>
 	<div class="container">
@@ -21,13 +23,12 @@
 		<div id="morelia" class="col-10-sm col-md-9 col-lg-8">
 			
 		</div>
-	<script src="../bower_components/bootstrap/dist/css/bootstrap.css"></script>
+	</div>
 	<script src="../bower_components/jQuery/dist/jquery.min.js"></script>
 	<script src="../bower_components/knockout/dist/knockout.js"></script>
 	<script src="scripts/app.js"></script>
-	<script src="styles/style.css"></script>
 	<script async defer
-	  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgy9M6bmPlYNu6rBZHs9F85rMw6g_OHwQ&region=MX">
+	  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgRcba6MyebP4u922OjUOdggT19UjdRQEregion=MX%26callback=morelia.init">
 	</script>
 </body>
 </html>
