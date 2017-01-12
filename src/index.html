@@ -1,32 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta name="viewport" content="initial-scale=1.0, user-scale=no">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0">
     <meta charset="utf-8">
 	<title>Neighborhood Map</title>
 	<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css">
-	<link src="styles/style.css">
+	<link src="css/style.css">
 </head>
 <body>
-	<div class="container">
-		<div class="col-sm-2 col-md-3 col-lg-4">
-			<h1>Lugares Turisticos en Morelia, MX</h1>
-			<nav id="location-list">
-				<ul data-bind="foreach: locations">
-					<li data-bind="text: title,
-						click: $parent.selectLocation.bind($parent)">
-					</li>
-				</ul>
-			</nav>
-
+	<section id="hero">
+		<div class="hero-info">
+			<h1>NYSee</h1>
+			<a data-bind="click:scrollTo('#control-bar')">Get Started</a>
 		</div>
-		<div id="morelia" class="col-10-sm col-md-9 col-lg-8">
-			
+	</section>
+
+	<div id="control-bar">
+		<div id="search">
+			<input data-bind="value: searchFilter, valueUpdate: 'afterkeydown'" placeholder="search" class="search-input"/>
+		</div>
+		<div id="filters" data-bind="foreach: searchWords">
+			<div class="filter"><input type="checkbox" data-bind="checked: $data.in" /><label class="filter-label" data-bind="text: $data.title, click: $parent.toggleSelect.bind($data)"></label></div>
 		</div>
 	</div>
-	<script src="../bower_components/knockout/dist/knockout.js"></script>
-	<script src="../bower_components/jQuery/dist/jquery.min.js"></script>
-	<script src="scripts/app.js"></script>
-	<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgRcba6MyebP4u922OjUOdggT19UjdRQEregion=MX%26callback=morelia.init"></script>
+
+	<main>
+		<div id="locations">
+			<ul data-bind="foreach: selectedLocationArray" id="selectedLocationArray">
+				<li class="place-item" data-bind="click: $parent.displayLocation.bind($data)"><h4 class="place-title" data-bind="text: $data.title"></h4><p class="place-info" data-bind="text: $data.streetAddress"></p></li>
+			</ul>
+		</div>
+		<div id="morelia"></div>
+	</main>
+	<section id="info-container" class="info">
+		<div data-bind="visible: networkProblem">
+			<h1 class="error">Check connection strength. </h1>
+		</div>
+
+		<div class="current-place" data-bind="with: currentLocation()">
+			<div class="place-details-container">
+				<div class="place-details">
+					<h2 data-bind="text: title"></h2>
+					<p class="address" data-bind="text: streetAddress"></p>
+
+					<p class="description" data-bind="text: id"></p>
+
+					<p class="contact">
+						<span data-bind="text: cityAddress"></span><br/>
+						<a class="link" target="_blank" data-bind="attr:{href: url}, text:url"></a>
+					</p>
+
+					<ul data-bind="foreach: tags" class="place-tags">
+						<li class="place-tag" data-bind="text: $data"></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="place-img-container">
+				
+			</div>
+		</div>
+	</section>
+	<script type="text/javascript" src="scripts/app.js"></script>
+	<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgRcba6MyebP4u922OjUOdggT19UjdRQE&callback=morelia.init&region=MX"></script>
+	<script type="text/javascript" src="../bower_components/knockout/dist/knockout.js"></script>
+	<script type="text/javascript" src="../bower_components/jQuery/dist/jquery.min.js"></script>
 </body>
 </html>

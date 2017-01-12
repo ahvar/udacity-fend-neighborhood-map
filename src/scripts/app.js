@@ -6,7 +6,8 @@
 /* about locations of interest in Morelia, MX
 *******************************************/
 
-var locations = [{
+var locations = [
+    {
     title: "Acueducto de Morelia",
     lat: 19.699203,
     lng: -101.15678,
@@ -17,7 +18,8 @@ var locations = [{
     visible: ko.observable(true),
     boolTest: true,
     tags: ['monuments', 'architecture', 'aqueduct', 'landmark', 'historic']
-}, {
+    }, 
+    {
     title: "Catedral de Morelia",
     lat: 19.705950,
     lng: -101.194982,
@@ -28,7 +30,8 @@ var locations = [{
     visible: ko.observable(true),
     boolTest: true,
     tags: ['cathedral', 'church', 'building', 'historic', 'architecture', 'landmark', 'center', 'catholic']
-}, {
+    }, 
+    {
     title: "Estadio Morelos",
     lat: 29.192834,
     lng: -108.150102,
@@ -39,7 +42,8 @@ var locations = [{
     visible: ko.observable(true),
     boolTest: true,
     tags: ['stadium', 'soccer', 'futbol', 'sports']
-}, {
+    }, 
+    {
     title: "Monumento ecuestre de Jose Maria Morelos",
     lat: 19.0786,
     lng: -102.3554,
@@ -50,7 +54,8 @@ var locations = [{
     visible: ko.observable(true),
     boolTest: true,
     tags: ['sculpture', 'horse', 'monument', 'historic', 'statue', 'Jose Maria Morelos']
-}, {
+    }, 
+    {
     title: "Antiguo Palacio de Justicia",
     lat: 25.7349,
     lng: -100.3094,
@@ -61,45 +66,28 @@ var locations = [{
     visible: ko.observable(true),
     boolTest: true,
     tags: ['government', 'historic', 'palace', 'court', 'justice', 'legal', 'museum', 'culture']
-}, ];
+    }
+];
 
 /*
  * A map of Morelia, Michoacan, MX
  */
 var morelia = {
-    init: function(viewmodel) {
-        var map = new google.maps.Map(document.getElementById('morelia'),map.options,{
-            infowindow: new google.maps.InfoWindow(),
-            options: {
-                center: {
-                    lat: 19.7060,
-                    lng: -101.1950
-                },
-                zoom: 12
-            },
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            mapTypeControl: true,
-            mapTypeControlOptions: {
-                style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-                position: google.maps.ControlPosition.BOTTOM_CENTER,
-                mapTypeIds: [google.maps.MapTypeId.ROADMAP],
-                panControl: true,
-                panControlOptions: {
-                    position: google.maps.ControlPosition.TOP_RIGHT
-                },
-                zoomControl: true,
-                zoomControlOptions: {
-                    style: google.maps.ZoomControlStyle.LARGE,
-                    position: google.maps.ControlPosition.LEFT_CENTER
-                }
-            },
-            infoWindowContent: '<div class = "info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>'
-        }
-        if (viewmodel.start && !viewmodel.markersDropped) {
-            viewmodel.dropMarkers();
-        }
-    }    
-};
+    map: {},
+    infowindow: new google.maps.Infowindow(),
+    options: {
+        center: {
+            lat: 19.7060,
+            lng: -101.1950
+        },
+        zoom: 12
+    },
+    infoWindowContent: '<div class = "info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
+    init: function(vm) {
+        morelia.map = new google.maps.Map(document.getElementById('morelia'),map.options);
+        if (vm.initialized && !vm.markersDropped) vm.showMarkers();
+    }
+};    
 
 
 /*********************************************************************
@@ -120,7 +108,7 @@ var Location = function(model, parent) {
     this.url = ko.observable(model.url);
     this.tags = ko.observable(model.tags);
 
-    this.start = ko.observable(false);
+    this.initialized = ko.observable(false);
 
     // create a new marker 
     var marker = new google.maps.Marker({
@@ -147,13 +135,13 @@ var Select = function(search) {
 //************************** VIEW MODEL *******************************
 **********************************************************************/
 
-var viewmodel = function() {
+var ViewModel = function() {
     var self = this;
 
     // view model properties
     self.selectWord = ko.observable('');
     self.selectedLocation = ko.observable();
-    self.start = false;
+    self.initialized = false;
     self.markersDropped = false;
     self.networkProblem = ko.observable(false);
 
@@ -164,27 +152,21 @@ var viewmodel = function() {
         /*create an array to hold locations of interest to user*/
         self.selectedLocationArray = ko.observableArray([]);
 
-        /* 
-         * Use a nested for loop to make a KO observable for each
-         * location in model and loop through the tags for each location
-         * and add them to the list of searchable words
-         */
-        var allLocations = locations;
-        for (var i = 0; i < allLocations.length; i++) {
-            self.selectedLocationArray.push(new Location(allLocations[i], self));
-            // if the tag doesn't already exist within the array of search words then push
-            for (var j = 0; j < allLocations[i].tags.length; j++) {
-                if (allLocations[i].tags[j].indexOf(searchWordsArray) < 0) {
-                    searchWordsArray.push(allLocations[i].tags[j]);
-                }
-            }
-        }
+        locations.forEach(function(location) {
+            self.selectedLocationArray.push(new Location(location, self));
 
-        for (var k = 0; k < searchWordsArray.length; k++) {
-            searchWordsArray.push(new Select({
-                word: searchWordsArray[k]
-            }));
-        }
+            location.tags.forEach(function(tag) {
+                if(searchWordsArray.indexOf(tag) < 0) {
+                    searchWordsArray.push(tag);
+                }
+            });
+        });
+
+        searchWordsArray.forEach(function(tag) {
+            currentDropDown.push(new Select({title: tag}));
+        });
+
+       // start here
 
         self.searchWords = ko.observableArray(currentDropDown);
 
@@ -200,32 +182,29 @@ var viewmodel = function() {
 
             var searchLocationArray = ko.observableArray([]);
             var userSelectedLocations = ko.observableArray([]);
-            /* 
-             * Use nested for loop to go through the array of
-             * of locations and put the associated tags into 
-             * a separate array called locationSearchWords.
-             * Loop through this array and assign matching words
-             * to matches variable.
-             */
-            var matches;
-            for (var i = 0; i < self.selectedLocationArray.length; i++) {
-                var locationSearchWords = self.selectedLocationArray[i].tags();
-                for (var j = 0; locationSearchWords.length; j++) {
-                    matches = self.currSearchWords().indexOf(locationSearchWords[j]) != -1;
-                    return matches;
-                }
-                if (matches.length > 0) {
-                    searchLocationArray.push(self.selectedLocationArray[i]);
-                }
+
+            ko.utils.arraysForEach(self.selectedLocationArray(), function(location) {
+                var locationTags = location.tags();
+                // loop through all tags for a place and
+                // determine if any are also a currently applied filter
+                var matches = locationTags.filter(function(tag){
+                    return self.currentSearchWords().indexOf(tag) != -1;
+                });
+
+                // if one or more tags for a place are in a filter, add it
+                if (matches.length > 0) searchLocationArray.push(location);
+            });
+
+            var tempSearchFilter = self.searchFilter().toLowerCase();
+
+            // if there is no additional text to search for, return filtered places
+            if (!tempSearchFilter){
+                userSelectedLocations = searchLocationArray;
             }
-
-            var wordSelectionArray = self.selectWord().toLowerCase();
-
-            if (!wordSelectionArray) {
-                userSelectedLocations = searchLocationArray();
-            } else {
-                userSelectedLocations = ko.utils.arrayFilter(searchLocationArray(), function(location) {
-                    return location.title().toLowerCase().indexOf(wordSelectionArray) !== -1;
+            // if user is also searching via text box, apply text filter
+            else{
+                userSelectedLocations = ko.utils.arrayFilter(searchLocationArray, function(location) {
+                    return location.title().toLowerCase().indexOf(tempSearchFilter) !== -1;
                 });
             }
 
@@ -236,9 +215,14 @@ var viewmodel = function() {
 
         if (!self.markersDropped) {
             self.dropMarkers();
-            self.start = true;
+            self.initialized = true;
         }
     };
+
+
+
+
+
 
     /*
      * loops through the array of locations passed into the function
@@ -246,16 +230,13 @@ var viewmodel = function() {
      * if match found, the marker property is set to visible
      */
     self.selectMarkers = function(selectedLocations) {
-        var locationIndex;
-        for (var m = 0; m < selectedLocations.length; m++) {
-            if (self.selectedLocationArray.indexOf(selectedLocations[m]) === -1) {
-                locationIndex = self.selectedLocationArray.indexOf(selectedLocations[m]);
-                self.selectedLocationArray[locationIndex].marker.setVisible(false);
+        ko.utils.arrayForEach(self.selectedLocationArray, function(location){
+            if (listOfSelectLocations.indexOf(location) === -1){
+                location.marker.setVisible(false);
             } else {
-                locationIndex = self.selectedLocationArray.indexOf(selectedLocations[m]);
-                self.selectedLocationArray[locationIndex].marker.setVisible(true);
+                location.marker.setVisible(true);
             }
-        }
+        });
     };
 
     /*
@@ -284,93 +265,71 @@ var viewmodel = function() {
         // store the location-list html element in the $nytElem variable
         var $nytElem = $("#location-list");
 
+        if (!location.initialized()) {
 
-        if (!location.start()) {
-            //store nyt url in variable nytURL
-            var nytURL = "http://api.nytimes.com/svc/semantic/v2/articlesearch.json";
-
-            //add parameter for country and api key to nytURL
-            nytURL = +$.param({
-                'q': selectedCity,
-                'api-key': "e82157a4c7cd48d68abae0a7452a48aa",
-                'fq': "Tourist",
-                'sort': "newest"
-            });
-
-            //request data
             $.ajax({
-                    url: nytURL,
-                    dataType: 'json'
-                })
-                .done(function(data) {
+        
+                url: 'http://api.nytimes.com/svc/semantic/v2/articlesearch.json'+location.lat()+','+location.lng()+'&intent=match&name='+location.title()
+            })
+            .done(function(data){
+                var attraction = data.response.locations[0];
 
-                    var articles = data.response.docs[0];
-                    //append each article url to the all articles element
-                    $.each(articles, function(index, element) {
-                        $nytElem.append('<li class="article">' + '<a href= "' + element.web_url + '">' + selectedCity + '</a>' +
-                            '</li>');
-                    });
-                    //set the view model's current location property to the location
-                    location.start(true);
-                    self.currentLocation(location);
-                    self.scrollTo("#location-list");
-                }).fail(function(error) {
-                    self.networkProblem(true);
-                    self.scrollTo("#location-list");
-                });
-        } else {
-            self.currentLocation(location);
-            self.scrollTo("#location-list");
-        }
+                location.id = ko.observable(attraction.id);
 
-    };
-
-    self.scrollTo = function(e1) {
-        $('html,body').animate({
-            scrollTop: $(e1).offset().top
-        }, "slow");
-    };
-
-    self.dropMarkers = function() {
-        for (var n = 0; self.selectedLocationArray.length; n++) {
-            self.selectedLocationArray[n].marker.setMap(morelia.map);
-        }
-        self.markersDropped = true;
-    };
-
-    self.populateInfoWindow = function(marker, infowindow) {
-        if (infowindow.marker != marker) {
-            infowindow.setContent('');
-            infowindow.marker = marker;
-            infowindow.addListener('closeclick', function() {
-                infowindow.marker = null;
-            });
-            var streetView = new google.maps.StreetViewService();
-            var radius = 50;
-
-            function getStreetView(data, status) {
-                if (status == google.maps.StreetViewStatus.OK) {
-                    var streetViewLocation = data.location.latlng;
-                    var heading = google.maps.geometry.spherical.computeHeading(
-                        streetViewLocation, marker.position);
-                    infowindow.setContent('<div>' + marker.title + '</div><div id="pano"</div>');
-                    var options = {
-                        position: streetViewLocation,
-                        pov: {
-                            heading: heading,
-                            pitch: 30
-                        }
-                    };
-                } else {
-                    infowindow.setContent('<div>' + marker.title + '</div>' +
-                        '<div>No street view available</div>');
+                if (attraction.hasOwnProperty('url')) {
+                    attraction.url = ko.observable(attraction.url);
                 }
-                streetView.getPanoramaByLocation(marker.position, radius, getStreetView);
-                infowindow.open(morelia, marker);
-            }
+                if (attraction.hasOwnProperty('contact') && attraction.contact.hasOwnProperty('formattedPhone')) {
+                    location.phone = ko.observable(attraction.contact.formattedPhone);
+                }
+
+                // use id to get photo
+                $.ajax({
+                    url: 'http://api.nytimes.com/svc/semantic/v2/articlesearch.json'+location.id()
+                })
+                .done(function(data){
+                    // set first photo url as the place photo property
+                    var photos = data.response.photos.items;
+                    location.photo = ko.observable(photos[0].prefix + 'width400' + photos[0].suffix);
+                    location.initialized(true);
+
+                    // set current place and scroll user to information
+                    self.currentlocation(location);
+                    self.scrollTo('#info-container');
+                })
+                .fail(function(err) {
+                    // if there is an error, set error status and scroll user to the info
+                    self.networkProblem(true);
+                    self.scrollTo('#info-container');
+                });
+            })
+            .fail(function(err){
+                self.networkProblem(true);
+                self.scrollTo('#info-container');
+            });
+        } 
+        else {
+            self.currentLocation(location);
+            self.scrollTo('#info-container');
         }
+    };
+
+    // helper function to scroll user to specified element
+    // el is a string representing the element selector
+    self.scrollTo = function(el) {
+        $('html, body').animate({ scrollTop: $(el).offset().top }, "slow");
+    };
+
+    // show marker for each place
+    self.showMarkers = function() {
+        ko.utils.arrayForEach(self.currentLocations(), function(location){
+            location.marker.setMap(morelia.map);
+        });
+
+        self.hasMarkers = true;
     };
 };
+
 
 var vm = new viewmodel();
 
