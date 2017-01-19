@@ -1,10 +1,11 @@
 # Udacity FEND: Neighborhood Map
-This is a map of in Morelia, the capital city in the Mexican state of Michoacan. Users can explore the history of this beautiful city by searching for its many cathedrals, hotels, restaurants, and plazas. 
+This is a map of in Morelia, the capital city in the Mexican state of Michoacan. The map has coffee houses, hotels, and monuments. This was completed as part of Udacity's Frontend Nanodegree program.
 
 ## Using the Neighborhood Map
-To use the map download all of the files from the github repository and open src/index.html in your preferred browser. When a location is clicked a popup window will display links to current news articles about the attraction.
+To use the map download all of the files from the github repository and open src/index.html in your preferred browser. When a location is clicked a popup window will display a picture of the location, address and contact information. Type in the search terms displayed in bubbles to narrow down locations based on preferred criteria (e.g. hotel, coffee, history). 
 
-## 
+[Click here to try out the map](http://ahvar.github.io/src/views/neighborhood-map-item/map/index.html) 
+ 
 
 # Resources
 
@@ -14,14 +15,13 @@ If you are unfamiliar with these tools, follow the links below and read the asso
 - [Bower](https://bower.io/) is a package manager for web applications.
 ##### Task Runners and Preprocessors
 - [Grunt](http://gruntjs.com/) - JavaScript task runner
-- [SASS](http://sass-lang.com/) - Syntactically awesome style sheets
 ##### Frameworks & Libraries
 - [Bootstrap](http://getbootstrap.com/) - A CSS framework for responsive web design
-- [AngularJS](https://angularjs.org/) - A JavaScript framework
+- [Knockout](http://knockoutjs.com/) - KnockoutJS helps you simplify dynamic JavaScript UIs using the Model-View-ViewModel (MVVM) design pattern.
 - [jQuery](https://jquery.com/) - A JavaScript library
 ##### API's and Services
-- [Google Maps](https://developers.google.com/maps/documentation/javascript/examples/style-array) - 
-- [Google Analytics Embed](https://developers.google.com/analytics/devguides/reporting/embed/v1/)
+- [Google Maps](https://developers.google.com/maps/documentation/javascript/examples/style-array)
+- [Foursquare](https://foursquare.com/) - Find the best places to eat, drink, shop, or visit in any city in the world.
 
 
 
