@@ -24,9 +24,9 @@
 	</div>
 
 	<main>
-		<div id="places">
-			<ul data-bind="foreach: filteredPlaces" id="place-list">
-				<li class="place-item" data-bind="click: $parent.showPlace.bind($data)"><h4 class="place-title" data-bind="text: $data.name"></h4><p class="place-info" data-bind="text: $data.info"></p></li>
+		<div id="Locations">
+			<ul data-bind="foreach: filteredLocations" id="location-list">
+				<li class="place-item" data-bind="click: $parent.showLocation.bind($data)"><h4 class="place-title" data-bind="text: $data.name"></h4><p class="place-info" data-bind="text: $data.info"></p></li>
 			</ul>
 		</div>
 		<div id="map"></div>
@@ -37,7 +37,7 @@
 			<h1 class="error">There was a problem. Check your connection.</h1>
 		</div>
 
-		<div class="current-place" data-bind="with: currentPlace()">
+		<div class="current-place" data-bind="with: currentLocation()">
 			<div class="place-details-container">
 				<div class="place-details">
 					<h2 data-bind="text: name"></h2>

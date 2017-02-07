@@ -50,7 +50,7 @@ var locations = [
 // *******************************
 // *         MAPS                *
 // *******************************
-var gMap = {
+var moreliaMap = {
 	map: {},
 	infoWindow: new google.maps.InfoWindow(), // reusable info window
 	options: {
@@ -58,17 +58,17 @@ var gMap = {
 		zoom: 12
 	},
 	infoWindowContent: '<div class="info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
-	init: function(vm) {
-		gMap.map = new google.maps.Map(document.getElementById('map'), gMap.options);
-		// shows markers depending on which loads faster - vm or google map
-		if (vm.initialized && !vm.hasMarkers) vm.showMarkers();
+	init: function(viewmodel) {
+		moreliaMap.map = new google.maps.Map(document.getElementById('map'), moreliaMap.options);
+		// shows markers depending on which loads faster - view model or google map
+		if (viewmodel.initialized && !viewmodel.hasMarkers) viewmodel.showMarkers();
 	}
 };
 
 // *******************************
 // *         LOCATION            *
 // *******************************
-var Place = function(data, parent) {
+var Location = function(data, parent) {
 	// info from provided data model
 	this.name = ko.observable(data.name);
 	this.info = ko.observable(data.info);
@@ -77,7 +77,7 @@ var Place = function(data, parent) {
 	this.lat = ko.observable(data.lat);
 	this.lng = ko.observable(data.lng);
 
-	// if this place has extra info via ajax
+	// if this location has extra info via ajax
 	this.initialized = ko.observable(false);
 
 	// google maps marker
@@ -87,10 +87,10 @@ var Place = function(data, parent) {
 	});
 
 	// click handler for google maps marker
-	google.maps.event.addListener(marker, 'click', (function(place, parent) {
+	google.maps.event.addListener(marker, 'click', (function(location, parent) {
 		return function() {
-			// tell viewmodel to show this place
-			parent.showPlace(place);
+			// tell viewmodel to show this location
+			parent.showLocation(location);
 		};
 	}) (this, parent));
 	this.marker = marker;
@@ -110,7 +110,7 @@ var Filter = function(data) {
 var ViewModel = function() {
 	var self = this;
 	self.searchFilter = ko.observable('');
-	self.currentPlace = ko.observable();
+	self.currentLocation = ko.observable();
 	self.initialized = false;
 	self.hasMarkers = false;
 	self.connectionError = ko.observable(false);
@@ -122,18 +122,18 @@ var ViewModel = function() {
 		var tempTagArr = [];
 		var tempFilterArr = [];
 
-		// create container for places
-		self.placeList = ko.observableArray([]);
+		// create container for locations
+		self.locationList = ko.observableArray([]);
 
-		// loop through places array and convert to ko object
-		locations.forEach(function(place) {
-			self.placeList.push(new Place(place, self));
+		// loop through locations array and convert to ko object
+		locations.forEach(function(location) {
+			self.locationList.push(new Location(location, self));
 
-			// loop through tags for each place and add to self.filters
-			place.tags.forEach(function(tag){
+			// loop through tags for each location and add to self.filters
+			location.tags.forEach(function(tag){
 				// if current tag is not already a filter, add to self.filters
 				if (tempTagArr.indexOf(tag) < 0) {
-					tempTagArr.push(tag);
+						tempTagArr.push(tag);
 				}
 			});
 		});
@@ -160,41 +160,41 @@ var ViewModel = function() {
 			return tempCurrentFilters;
 		});
 
-		// array of places to be shown based on currentFilters
-		self.filteredPlaces = ko.computed(function() {
-			var tempPlaces = ko.observableArray([]);
-			var returnPlaces = ko.observableArray([]);
+		// array of locations to be shown based on currentFilters
+		self.filteredLocations = ko.computed(function() {
+			var tempLocations = ko.observableArray([]);
+			var returnLocations = ko.observableArray([]);
 
 			// apply filter
-			ko.utils.arrayForEach(self.placeList(), function(place){
-				var placeTags = place.tags();
+			ko.utils.arrayForEach(self.locationList(), function(location){
+				var locationTags = location.tags();
 
-				// loop through all tags for a place and
+				// loop through all tags for a location and
 				// determine if any are also a currently applied filter
-				var intersections = placeTags.filter(function(tag){
+				var intersections = locationTags.filter(function(tag){
 					return self.currentFilters().indexOf(tag) != -1;
 				});
 
-				// if one or more tags for a place are in a filter, add it
-				if (intersections.length > 0) tempPlaces.push(place);
+				// if one or more tags for a location are in a filter, add it
+				if (intersections.length > 0) tempLocations.push(location);
 			});
 
 			var tempSearchFilter = self.searchFilter().toLowerCase();
 
-			// if there is no additional text to search for, return filtered places
+			// if there is no additional text to search for, return filtered locations
 			if (!tempSearchFilter){
-				returnPlaces = tempPlaces();
+				returnLocations = tempLocations();
 			}
 			// if user is also searching via text box, apply text filter
 			else{
-				returnPlaces = ko.utils.arrayFilter(tempPlaces(), function(place) {
-		        	return place.name().toLowerCase().indexOf(tempSearchFilter) !== -1;
+				returnLocations = ko.utils.arrayFilter(tempLocations(), function(location) {
+		        	return location.name().toLowerCase().indexOf(tempSearchFilter) !== -1;
 		        });
 			}
 
-			// hide/show correct markers based on list of current places
-			self.filterMarkers(returnPlaces);
-			return returnPlaces;
+			// hide/show correct markers based on list of current locations
+			self.filterMarkers(returnLocations);
+			return returnLocations;
 
 		});
 
@@ -208,13 +208,13 @@ var ViewModel = function() {
 	// *******************************
 
 	// shows/hides correct map markers
-	self.filterMarkers = function(filteredPlaces) {
-		ko.utils.arrayForEach(self.placeList(), function(place){
-			if (filteredPlaces.indexOf(place) === -1) {
-				place.marker.setVisible(false);
+	self.filterMarkers = function(filteredLocations) {
+		ko.utils.arrayForEach(self.locationList(), function(location){
+			if (filteredLocations.indexOf(location) === -1) {
+				location.marker.setVisible(false);
 			}
 			else{
-				place.marker.setVisible(true);
+				location.marker.setVisible(true);
 			}
 		});
 	};
@@ -225,57 +225,57 @@ var ViewModel = function() {
 		filter.on(!filter.on());
 	};
 
-	// show the currently selected place
+	// show the currently selected location
 	// called when list item or map marker is clicked
-	self.showPlace = function(place) {
+	self.showLocation = function(location) {
 		// set info window content and show it
-		gMap.infoWindow.setContent(gMap.infoWindowContent.replace('%title%', place.name()).replace('%description%', place.address()));
-		gMap.infoWindow.open(gMap.map, place.marker);
+		moreliaMap.infoWindow.setContent(moreliaMap.infoWindowContent.replace('%title%', location.name()).replace('%description%', location.address()));
+		moreliaMap.infoWindow.open(moreliaMap.map, location.marker);
 
 		// set the old marker icon back
-		if (self.currentPlace()) self.currentPlace().marker.setIcon('img/marker.png');
+		if (self.currentLocation()) self.currentLocation().marker.setIcon('img/marker.png');
 
 		// set new marker to selected icon
-		place.marker.setIcon('img/marker_selected.png');
+		location.marker.setIcon('img/marker_selected.png');
 
 		// reset error status
 		self.connectionError(false);
 
-		// if place does not have additional info via ajax
-		if (!place.initialized()) {
+		// if location does not have additional info via ajax
+		if (!location.initialized()) {
 
 			// call to get initial information
 			$.ajax({
 				//url:'https://api.foursquare.com/v2/venues/search?v=20161016&ll='+place.lat()+'%2C%20'+place.lng()+'&query=coffee&intent=checkin&client_id=PNBRN4E4DHEVQYRLIAH4V5J5F34NXPJZR5KXKZE5KPRN5L2D&client_secret=KBTAM03M11ENMURLL1T3QP1IU1YGCNTNUH1GPYN2RBXDCHA2'
-				url: 'https://api.foursquare.com/v2/venues/search?ll='+place.lat()+','+place.lng()+'&intent=match&name='+place.name()+'&client_id=PNBRN4E4DHEVQYRLIAH4V5J5F34NXPJZR5KXKZE5KPRN5L2D&client_secret=KBTAM03M11ENMURLL1T3QP1IU1YGCNTNUH1GPYN2RBXDCHA2&v=20161016'			
+				url: 'https://api.foursquare.com/v2/venues/search?ll='+location.lat()+','+location.lng()+'&intent=match&name='+location.name()+'&client_id=PNBRN4E4DHEVQYRLIAH4V5J5F34NXPJZR5KXKZE5KPRN5L2D&client_secret=KBTAM03M11ENMURLL1T3QP1IU1YGCNTNUH1GPYN2RBXDCHA2&v=20161016'			
 			})
 			.done(function(data){
 				var venue = data.response.venues[0];
 				console.log(venue); 
 
-				//set fetched info as properties of Place object
-				place.id = ko.observable(venue.id);
+				//set fetched info as properties of Location object
+				location.id = ko.observable(venue.id);
 
 				if (venue.hasOwnProperty('url')) {
-					place.url = ko.observable(venue.url);
+					location.url = ko.observable(venue.url);
 				}
 				//if (venue.hasOwnProperty('contact') && venue.contact.hasOwnProperty('formattedPhone')) {
-				//	place.phone = ko.observable(venue.contact.formattedPhone);
+				//	location.phone = ko.observable(venue.contact.formattedPhone);
 				//}
 
 				// use id to get photo
 				$.ajax({
 					//url:'https://api.foursquare.com/v2/venues/search?v=20161016&ll='+place.id()+'/photos?client_id=PNBRN4E4DHEVQYRLIAH4V5J5F34NXPJZR5KXKZE5KPRN5L2D&client_secret=KBTAM03M11ENMURLL1T3QP1IU1YGCNTNUH1GPYN2RBXDCHA2'
-					url: 'https://api.foursquare.com/v2/venues/'+place.id()+'/photos?client_id=PNBRN4E4DHEVQYRLIAH4V5J5F34NXPJZR5KXKZE5KPRN5L2D&client_secret=KBTAM03M11ENMURLL1T3QP1IU1YGCNTNUH1GPYN2RBXDCHA2&v=20161016'
+					url: 'https://api.foursquare.com/v2/venues/'+location.id()+'/photos?client_id=PNBRN4E4DHEVQYRLIAH4V5J5F34NXPJZR5KXKZE5KPRN5L2D&client_secret=KBTAM03M11ENMURLL1T3QP1IU1YGCNTNUH1GPYN2RBXDCHA2&v=20161016'
 				})
 				.done(function(data){
-					// set first photo url as the place photo property
+					// set first photo url as the location photo property
 					var photos = data.response.photos.items;
-					place.photo = ko.observable(photos[0].prefix + 'width400' + photos[0].suffix);
-					place.initialized(true);
+					location.photo = ko.observable(photos[0].prefix + 'width400' + photos[0].suffix);
+					location.initialized(true);
 
-					// set current place and scroll user to information
-					self.currentPlace(place);
+					// set current location and scroll user to information
+					self.currentLocation(location);
 					self.scrollTo('#info-container');
 				})
 				.fail(function(err) {
@@ -291,10 +291,10 @@ var ViewModel = function() {
 				self.scrollTo('#info-container');
 			});
 		}
-		// if place has already fetched data
+		// if location has already fetched data
 		else {
-			// set current place and scroll user to information
-			self.currentPlace(place);
+			// set current location and scroll user to information
+			self.currentLocation(location);
 			self.scrollTo('#info-container');
 		}
 	};
@@ -305,10 +305,10 @@ var ViewModel = function() {
 		$('html, body').animate({ scrollTop: $(el).offset().top }, "slow");
 	};
 
-	// show marker for each place
+	// show marker for each location
 	self.showMarkers = function() {
-		ko.utils.arrayForEach(self.placeList(), function(place){
-			place.marker.setMap(gMap.map);
+		ko.utils.arrayForEach(self.locationList(), function(location){
+			location.marker.setMap(moreliaMap.map);
 		});
 
 		self.hasMarkers = true;
@@ -321,18 +321,18 @@ var ViewModel = function() {
 // *******************************
 
 // empty view model
-var vm = new ViewModel();
+var viewmodel = new ViewModel();
 
 // listener for view model initialization
 $( document ).ready(function() {
-	vm.init();
-	ko.applyBindings(vm);
+	viewmodel.init();
+	ko.applyBindings(viewmodel);
 
 	// resize map and reset center when window size changes
 	$(window).on('resize', function() {
-		google.maps.event.trigger(gMap.map, 'resize');
-		gMap.map.setCenter(gMap.options.center);
+		google.maps.event.trigger(moreliaMap.map, 'resize');
+		moreliaMap.map.setCenter(moreliaMap.options.center);
 	});
 });
 
-google.maps.event.addDomListener(window, 'load', gMap.init(vm));
+google.maps.event.addDomListener(window, 'load', moreliaMap.init(viewmodel));
