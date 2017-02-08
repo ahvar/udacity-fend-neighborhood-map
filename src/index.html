@@ -7,16 +7,16 @@
 	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-	<section id="hero">
-		<div class="hero-info">
-			<h1>Morelia</h1>
-			<a data-bind="click:scrollTo('#control-bar')">Begin</a>
+	<section id="finger-flag">
+		<div class="finger-flag-info">
+			<h1></h1>
+			<a data-bind="click:scrollTo('#search-menu')">Morelia</a>
 		</div>
 	</section>
 
-	<div id="control-bar">
-		<div id="search">
-			<input data-bind="value: searchFilter, valueUpdate: 'afterkeydown'" placeholder="search" class="search-input"/>
+	<div id="search-menu">
+		<div id="find">
+			<input data-bind="value: searchWord, valueUpdate: 'afterkeydown'" placeholder="find" class="find-word"/>
 		</div>
 		<div id="filters" data-bind="foreach: filters">
 			<div class="filter"><input type="checkbox" data-bind="checked: $data.on" /><label class="filter-label" data-bind="text: $data.name, click: $parent.toggleFilter.bind($data)"></label></div>
@@ -26,13 +26,13 @@
 	<main>
 		<div id="Locations">
 			<ul data-bind="foreach: filteredLocations" id="location-list">
-				<li class="place-item" data-bind="click: $parent.showLocation.bind($data)"><h4 class="place-title" data-bind="text: $data.name"></h4><p class="place-info" data-bind="text: $data.info"></p></li>
+				<li class="location-item" data-bind="click: $parent.showLocation.bind($data)"><h4 class="location-title" data-bind="text: $data.name"></h4><p class="place-info" data-bind="text: $data.description"></p></li>
 			</ul>
 		</div>
 		<div id="map"></div>
 	</main>
 
-	<section id="info-container" class="info">
+	<section id="description-box" class="description">
 		<div data-bind="visible: connectionError">
 			<h1 class="error">There was a problem. Check your connection.</h1>
 		</div>
@@ -43,7 +43,7 @@
 					<h2 data-bind="text: name"></h2>
 					<p class="address" data-bind="text: address"></p>
 
-					<p class="description" data-bind="text: info"></p>
+					<p class="description" data-bind="text: description"></p>
 
 					<p class="contact">
 						

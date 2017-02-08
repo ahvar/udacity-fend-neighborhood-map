@@ -1,7 +1,7 @@
 "use strict";
 
 // *******************************
-// *         DATA MODEL          *
+// * ARRAY OF LOCATION OBJECTS   *
 // *******************************
 var locations = [
 	{
@@ -9,7 +9,7 @@ var locations = [
 		address: 'Av Enrique Ramirez y Av Camelinas',
 		lat: 19.6889285,
 		lng: -101.1581993,
-		info: 'Coffee house',
+		description: 'Coffee house',
 		tags: ['coffee', 'refreshment', 'Morelia']
 	},
 	{
@@ -17,7 +17,7 @@ var locations = [
 		address: 'Juan Pablo II',
 		lat: 19.67581432,
 		lng: -101.1824002,
-		info: 'Coffee Clouds',
+		description: 'Coffee Clouds',
 		tags: ['coffee', 'clouds', 'morelia']
 	},
 	{
@@ -25,7 +25,7 @@ var locations = [
 		address: 'Morelia, Michoacan de Ocampo, Morelos, Mich., Mexico',
 		lat: 19.697991,
 		lng: -101.180381,
-		info: 'Statue of Cuahutemoc',
+		description: 'Statue of Cuahutemoc',
 		tags: ['statues', 'history']
 	},
 	{
@@ -33,7 +33,7 @@ var locations = [
 		address: 'Av Francisco 1. Madero Ote 137, Centro, Centro Historico, 58000 Morelia, Mich., Mexico',
 		lat: 19.703539,
 		lng: -101.181069,
-		info: '5-Star hotel in Morelia historic district',
+		description: '5-Star hotel in Morelia historic district',
 		tags: ['hotel', 'historic', 'sleep']
 	},
 	{
@@ -41,14 +41,22 @@ var locations = [
 		address: 'Ignacio Zaragoza 90, Centro, 58000 Morelia, Mich., Mexico',
 		lat: 19.703658,
 		lng: -101.192996,
-		info: 'Five star hotel in Morelia, Michoacan',
+		description: 'Five star hotel in Morelia, Michoacan',
 		tags: ['hotel', 'morelia']
+	},
+	{
+		name: 'Cocktail Mar + Bar',
+		address: 'Av Juan Pablo II Presa Altozano 1657, 58090 Morelia, Mich., Mexico',
+		lat: 19.670123,
+		lng: -101.170320,
+		description: 'En Cocktail la vida es mas sabrosa',
+		tags: ['bar', 'morelia']
 	}
 
 ];
 
 // *******************************
-// *         MAPS                *
+// * GOOGLE MAP OF MORELIA       *
 // *******************************
 var moreliaMap = {
 	map: {},
@@ -57,7 +65,7 @@ var moreliaMap = {
 		center: { lat: 19.705950, lng: -101.194982},
 		zoom: 12
 	},
-	infoWindowContent: '<div class="info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
+	infoWindowContent: '<div class="description-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
 	init: function(viewmodel) {
 		moreliaMap.map = new google.maps.Map(document.getElementById('map'), moreliaMap.options);
 		// shows markers depending on which loads faster - view model or google map
@@ -66,12 +74,12 @@ var moreliaMap = {
 };
 
 // *******************************
-// *         LOCATION            *
+// *  A LOCATION OBJECT          *
 // *******************************
 var Location = function(data, parent) {
 	// info from provided data model
 	this.name = ko.observable(data.name);
-	this.info = ko.observable(data.info);
+	this.description = ko.observable(data.description);
 	this.address = ko.observable(data.address);
 	this.tags = ko.observableArray(data.tags);
 	this.lat = ko.observable(data.lat);
@@ -109,7 +117,7 @@ var Filter = function(data) {
 // *******************************
 var ViewModel = function() {
 	var self = this;
-	self.searchFilter = ko.observable('');
+	self.searchWord = ko.observable('');
 	self.currentLocation = ko.observable();
 	self.initialized = false;
 	self.hasMarkers = false;
@@ -119,76 +127,74 @@ var ViewModel = function() {
 	// *            INIT             *
 	// *******************************
 	self.init = function() {
-		var tempTagArr = [];
-		var tempFilterArr = [];
+		
+		var srchTagArray = [];
+		var srchWrdArray = [];
 
 		// create container for locations
 		self.locationList = ko.observableArray([]);
 
-		// loop through locations array and convert to ko object
-		locations.forEach(function(location) {
-			self.locationList.push(new Location(location, self));
+		// add locations from the data model to the observable array
+		for (let i = 0; i < locations.length; i++) {
+			self.locationList.push(new Location(locations[i], self));
 
-			// loop through tags for each location and add to self.filters
-			location.tags.forEach(function(tag){
-				// if current tag is not already a filter, add to self.filters
-				if (tempTagArr.indexOf(tag) < 0) {
-						tempTagArr.push(tag);
+
+			// add the location tags to the srchTagArray
+			for (let j = 0; j < locations[i].tags.length; j++) {
+				if (srchTagArray.indexOf(locations[i].tags[j]) < 0) {
+					srchTagArray.push(locations[i].tags[j]);
 				}
-			});
-		});
-
-		// loop through tags and make filter objects from them
-		tempTagArr.forEach(function(tag){
-			tempFilterArr.push(new Filter({name: tag}));
-		});
-
+			}
+		}
+		// make the tags searchable 
+		for (let k = 0; k < srchTagArray.length; k++) {
+			srchWrdArray.push(new Filter({name: srchTagArray[k]}));
+		}
 		 
 
 		
-		self.filters = ko.observableArray(tempFilterArr);
+		self.filters = ko.observableArray(srchWrdArray);
 
 	
 		self.currentFilters = ko.computed(function() {
 			var tempCurrentFilters = [];
 
-			// loop through filters and get all filters that are on
-			ko.utils.arrayForEach(self.filters(), function(filter){
-				if (filter.on()) tempCurrentFilters.push(filter.name());
-			});
-
+			for (let i = 0; i < self.filters().length; i++) {
+				if (self.filters()[i].on()) {
+					tempCurrentFilters.push(self.filters()[i].name());
+				}
+			}
+		
 			return tempCurrentFilters;
 		});
 
-		// array of locations to be shown based on currentFilters
+		// the current list of locations selected by the user
 		self.filteredLocations = ko.computed(function() {
 			var tempLocations = ko.observableArray([]);
 			var returnLocations = ko.observableArray([]);
 
-			// apply filter
-			ko.utils.arrayForEach(self.locationList(), function(location){
-				var locationTags = location.tags();
+			for (let i = 0; i < self.locationList().length; i++) {
+				var locationTags = self.locationList()[i].tags();
 
-				// loop through all tags for a location and
-				// determine if any are also a currently applied filter
-				var intersections = locationTags.filter(function(tag){
+				var matches = locationTags.filter(function(tag){
 					return self.currentFilters().indexOf(tag) != -1;
 				});
+				if (matches.length > 0) {
+					tempLocations.push(self.locationList()[i]);
+				}
+			}
+		
 
-				// if one or more tags for a location are in a filter, add it
-				if (intersections.length > 0) tempLocations.push(location);
-			});
+			var tempSearchWord = self.searchWord().toLowerCase();
 
-			var tempSearchFilter = self.searchFilter().toLowerCase();
-
-			// if there is no additional text to search for, return filtered locations
-			if (!tempSearchFilter){
+			
+			if (!tempSearchWord){
 				returnLocations = tempLocations();
 			}
 			// if user is also searching via text box, apply text filter
 			else{
 				returnLocations = ko.utils.arrayFilter(tempLocations(), function(location) {
-		        	return location.name().toLowerCase().indexOf(tempSearchFilter) !== -1;
+		        	return location.name().toLowerCase().indexOf(tempSearchWord) !== -1;
 		        });
 			}
 
@@ -276,26 +282,26 @@ var ViewModel = function() {
 
 					// set current location and scroll user to information
 					self.currentLocation(location);
-					self.scrollTo('#info-container');
+					self.scrollTo('#description-box');
 				})
 				.fail(function(err) {
 					// if there is an error, set error status and scroll user to the info
 					self.connectionError(true);
-					self.scrollTo('#info-container');
+					self.scrollTo('#desription-box');
 				});
 
 			})
 			.fail(function(err) {
 				// if there is an error, set error status and scroll user to the info
 				self.connectionError(true);
-				self.scrollTo('#info-container');
+				self.scrollTo('#description-box');
 			});
 		}
 		// if location has already fetched data
 		else {
 			// set current location and scroll user to information
 			self.currentLocation(location);
-			self.scrollTo('#info-container');
+			self.scrollTo('#description-box');
 		}
 	};
 
