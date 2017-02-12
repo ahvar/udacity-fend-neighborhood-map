@@ -1,0 +1,46 @@
+	<section id="finger-flag">
+		<div class="finger-flag-info">
+			<h1></h1>
+			<a data-bind="click:scrollTo('#search-menu')">Morelia</a>
+		</div>
+	</section>
+
+	<div id="filters" data-bind="foreach: filters">
+			<div class="filter"><input type="checkbox" data-bind="checked: $data.on" /><label class="filter-label" data-bind="text: $data.name, click: $parent.toggleFilter.bind($data)"></label></div>
+		</div>
+
+				<div id="search-menu">
+		<div id="find">
+			<input data-bind="value: searchWord, valueUpdate: 'afterkeydown'" placeholder="find" class="find-word"/>
+		</div>
+
+		<section id="description-box" class="description">
+			<div data-bind="visible: connectionError">
+				<h1 class="error">There was a problem. Check your connection.</h1>
+			</div>
+
+			<div class="current-place" data-bind="with: currentLocation()">
+				<div class="place-details-container">
+					<div class="place-details">
+						<h2 data-bind="text: name"></h2>
+						<p class="address" data-bind="text: address"></p>
+
+						<p class="description" data-bind="text: description"></p>
+
+						<p class="contact">
+						
+						<a class="link" target="_blank" data-bind="attr:{href: url}, text:url"></a>
+						</p>
+
+						<ul data-bind="foreach: tags" class="place-tags">
+							<li class="place-tag" data-bind="text: $data"></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+			<div class="place-img-container">
+				<img class="place-img" data-bind="attr:{src: photo}" />
+			</div>
+		</div>
+	</section>

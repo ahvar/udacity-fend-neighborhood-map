@@ -43,15 +43,8 @@ var locations = [
 		lng: -101.192996,
 		description: 'Five star hotel in Morelia, Michoacan',
 		tags: ['hotel', 'morelia']
-	},
-	{
-		name: 'Cocktail Mar + Bar',
-		address: 'Av Juan Pablo II Presa Altozano 1657, 58090 Morelia, Mich., Mexico',
-		lat: 19.670123,
-		lng: -101.170320,
-		description: 'En Cocktail la vida es mas sabrosa',
-		tags: ['bar', 'morelia']
 	}
+
 
 ];
 

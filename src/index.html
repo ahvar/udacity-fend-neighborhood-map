@@ -5,40 +5,37 @@
 	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 	<title>Neighborhood Map</title>
 	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
 </head>
 <body>
-	<section id="finger-flag">
-		<div class="finger-flag-info">
-			<h1></h1>
-			<a data-bind="click:scrollTo('#search-menu')">Morelia</a>
-		</div>
-	</section>
-
-	<div id="search-menu">
-		<div id="find">
-			<input data-bind="value: searchWord, valueUpdate: 'afterkeydown'" placeholder="find" class="find-word"/>
-		</div>
-		<div id="filters" data-bind="foreach: filters">
-			<div class="filter"><input type="checkbox" data-bind="checked: $data.on" /><label class="filter-label" data-bind="text: $data.name, click: $parent.toggleFilter.bind($data)"></label></div>
+	<div class="row">
+		<div id="search-menu" class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
+			<div id="find" class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-xl-3">
+				<input data-bind="value: searchWord, valueUpdate: 'afterkeydown'" placeholder="find" class="find-word"/>
+			</div>
 		</div>
 	</div>
-
-	<main>
-		<div id="Locations">
+	<div id="filters" data-bind="foreach: filters">
+		<div class="filter"><input type="checkbox" data-bind="checked: $data.on" /><label class="filter-label" data-bind="text: $data.name, click: $parent.toggleFilter.bind($data)"></label></div>
+	</div>
+	<div id="Locations" class="col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-3">
 			<ul data-bind="foreach: filteredLocations" id="location-list">
 				<li class="location-item" data-bind="click: $parent.showLocation.bind($data)"><h4 class="location-title" data-bind="text: $data.name"></h4><p class="place-info" data-bind="text: $data.description"></p></li>
 			</ul>
-		</div>
-		<div id="map"></div>
-	</main>
-
+	</div>
+	<div id="map" class="col-xs-12 col-sm-12 col-md-9 col-lg-9 col-xl-9 "></div>
+	
+	
 	<section id="description-box" class="description">
 		<div data-bind="visible: connectionError">
 			<h1 class="error">There was a problem. Check your connection.</h1>
 		</div>
-
+		
 		<div class="current-place" data-bind="with: currentLocation()">
-			<div class="place-details-container">
+			<div class="place-details-container col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+				<div class="place-img-container col-xs-12 col-sm-12 col-md-9 col-lg-9 col-xl-9">
+					<img class="place-img" data-bind="attr:{src: photo}">
+				</div>
 				<div class="place-details">
 					<h2 data-bind="text: name"></h2>
 					<p class="address" data-bind="text: address"></p>
@@ -47,7 +44,8 @@
 
 					<p class="contact">
 						
-						<a class="link" target="_blank" data-bind="attr:{href: url}, text:url"></a>
+					<a class="link" target="_blank" data-bind="attr:{href: url}, text:url"></a>
+						
 					</p>
 
 					<ul data-bind="foreach: tags" class="place-tags">
@@ -55,16 +53,11 @@
 					</ul>
 				</div>
 			</div>
-
-			<div class="place-img-container">
-				<img class="place-img" data-bind="attr:{src: photo}" />
-			</div>
 		</div>
 	</section>
-
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgRcba6MyebP4u922OjUOdggT19UjdRQE&region=MX"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgRcba6MyebP4u922OjUOdggT19UjdRQE&region=MX"></script>
 	<script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>
