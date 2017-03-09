@@ -275,34 +275,45 @@ var ViewModel = function() {
 
 					// set current location and scroll user to information
 					self.currentLocation(location);
-					self.scrollTo('#description-box');
+					//self.scrollTo('#description-box');
+					self.floatUp('.place-details-container');
 				})
 				.fail(function(err) {
 					// if there is an error, set error status and scroll user to the info
 					self.connectionError(true);
-					self.scrollTo('#desription-box');
+					//self.scrollTo('#desription-box');
+					self.floatUp('.place-details-container');
 				});
 
 			})
 			.fail(function(err) {
 				// if there is an error, set error status and scroll user to the info
 				self.connectionError(true);
-				self.scrollTo('#description-box');
+				//self.scrollTo('#description-box');
+				self.floatUp('.place-details-container');
 			});
 		}
 		// if location has already fetched data
 		else {
 			// set current location and scroll user to information
 			self.currentLocation(location);
-			self.scrollTo('#description-box');
+			//self.scrollTo('#description-box');
+			self.floatUp('.place-details-container');
 		}
 	};
 
-	// helper function to scroll user to specified element
-	// el is a string representing the element selector
-	self.scrollTo = function(el) {
-		$('html, body').animate({ scrollTop: $(el).offset().top }, "slow");
+	// helper function to float location image and details
+	// over the map. element refers to the HTMl element to float
+	// self.scrollTo = function(element) {
+	self.floatUp = function(element) {
+	//$('html, body').animate({ scrollTop: $(element).offset().top }, "slow");
+	$(element).animate(
+			{'bottom': 2000},
+			8000, 
+			'swing'
+		);
 	};
+
 
 	// show marker for each location
 	self.showMarkers = function() {

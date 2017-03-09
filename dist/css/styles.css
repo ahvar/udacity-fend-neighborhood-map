@@ -8,7 +8,7 @@
 	box-sizing: border-box;
 }
 
-html, body, #map {
+html, body{
 	width: 100%;
 	height: 100%;
 	background-color: whitesmoke;
@@ -21,51 +21,10 @@ body{
 	margin-bottom: 30px;
 }
 
-#finger-flag {
-	position: relative;
-	width: 100%;
-	height: 400px;
-	background: url(../img/hero.jpg);
-    background-size: cover;
-}
-
-.finger-flag-info {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin-top: -80px;
-	margin-left: -96.5px;
-	text-align: center;
-	color: #fff;
-}
-
-
-.finger-flag-info h1 {
-    font-size: 4em;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
-}
-
-.finger-flag-info a {
-    color:  #fff;
-    text-decoration: none;
-    font-weight: 400;
-    border: 2px solid #fff;
-    border-radius: 15px;
-    padding: 5px 20px;
-    background-color: rgba(0,0,0,0.25);
-    cursor: pointer;
-}
-
-.finger-flag-info a:hover {
-	border-width: 1px;
-	opacity: .7;
-}
-
 /* search menu */
 
 #search-menu{
-	background-color: #FAEBD7;
+	background-color: #00ff7f;
 	width:  100%;
 	padding: 10px;
 	min-height: 55px;
@@ -134,19 +93,17 @@ input:focus{
     outline: 0;
 }
 
-/* main: map * places-list */
+/* main: map * location-list */
 
-main {
+.col-xs-3 .col-xs-9 .col-sm-3 .col-sm-9 .col-md-3 .col-md-9 .col-lg-3 .col-lg-9 .col-xl-3 .col-xl-9 {
 	width: 100%;
 	position: relative;
 	height: 450px;
 }
 
-
 #map{
-	background-color: #E9E5DC;
 	width: 100%;
-	height: 75%;
+	height: 100%;
 }
 
 #locations{
@@ -271,100 +228,4 @@ footer {
     text-align: center;
     font-size: .8em;
     background-color: whitesmoke;
-}
-
-/* media queries */
-
-@media(min-width: 1024px) {
-	main {
-		height: 600px;
-	}
-
-	#hero {
-		height: 500px;
-	}
-
-	#locations {
-		width: 25%;
-	}
-
-	#map {
-		width: 75%;
-	}
-
-	.place-img-container {
-		width: 30%;
-	}
-
-	.place-details-container {
-		width: 70%;
-	}
-}
-
-@media(max-height: 736px) {
-	#finger-flag {
-		height: 100%;
-	}
-}
-
-@media(max-width: 699px) {
-	#find {
-	    position: relative;
-	    top: inherit;
-	    right: inherit;
-	}
-
-	#filters {
-	    margin-top: 12px;
-	}
-
-	.find-word {
-	    width: 100%;
-	}
-
-	.place-img-container {
-	    width: 30%;
-	}
-
-	.place-details-container {
-	    width: 70%;
-	}
-}
-
-@media(max-width: 599px) {
-	#locations {
-	    float: none;
-	    width: 100%;
-	    height: auto;
-	}
-
-	#location-list {
-	    height: auto;
-	    max-height: 280px;
-	    border-bottom: 1px solid grey;
-	}
-
-	#map {
-	    float: none;
-	    width: 100%;
-	    height: 320px;
-	}
-
-	main {
-	    height: auto;
-	}
-}
-
-@media(max-width: 399px) {
-	.place-img-container {
-		float: none;
-		width: 100%;
-		padding-right: 20px;
-		margin-top: 20px;
-	}
-
-	.place-details-container {
-	    float: none;
-	    width: 100%;
-	}
 }

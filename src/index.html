@@ -26,7 +26,7 @@
 	<div id="map" class="col-xs-12 col-sm-12 col-md-9 col-lg-9 col-xl-9 "></div>
 	
 	
-	<section id="description-box" class="description">
+	<section class="description">
 		<div data-bind="visible: connectionError">
 			<h1 class="error">There was a problem. Check your connection.</h1>
 		</div>
@@ -34,7 +34,7 @@
 		<div class="current-place" data-bind="with: currentLocation()">
 			<div class="place-details-container col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
 				<div class="place-img-container col-xs-12 col-sm-12 col-md-9 col-lg-9 col-xl-9">
-					<img class="place-img" data-bind="attr:{src: photo}">
+					<img class="place-img" id="description-box" data-bind="attr:{src: photo}">
 				</div>
 				<div class="place-details">
 					<h2 data-bind="text: name"></h2>
